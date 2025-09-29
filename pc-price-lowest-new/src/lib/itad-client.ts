@@ -107,7 +107,9 @@ export async function itadFetch(url: URL | string, opts: FetchOpts = {}) {
   const t = setTimeout(() => controller.abort(), 20_000);
 
   const urlObj = new URL(typeof url === "string" ? url : url.toString());
-  if (!urlObj.searchParams.has("key") && API_KEY) {
+  
+  // GETリクエストの場合のみURL パラメータにAPIキーを追加
+  if (init.method === "GET" && !urlObj.searchParams.has("key") && API_KEY) {
     urlObj.searchParams.set("key", API_KEY);
   }
   
@@ -171,13 +173,23 @@ export async function itadPricesV3(
   shops = SHOPS_PC
 ) {
   const url = new URL(`${ITAD_BASE}/games/prices/v3`);
-  url.searchParams.set("country", country);
-  url.searchParams.set("shops", shops.join(","));
-  url.searchParams.set("deals", "false");
-  url.searchParams.set("ids", ids.join(","));
+  
+  // POSTリクエストのためのボディを準備
+  const body = new URLSearchParams();
+  body.set("country", country);
+  body.set("shops", shops.join(","));
+  body.set("deals", "false");
+  body.set("ids", ids.join(","));
+  if (API_KEY) {
+    body.set("key", API_KEY);
+  }
 
   const r = await itadFetch(url, {
-    method: "GET",
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: body.toString(),
     label: "prices-v3",
   });
   return r.json();
@@ -189,12 +201,22 @@ export async function itadStoreLowV2(
   shops = SHOPS_PC
 ) {
   const url = new URL(`${ITAD_BASE}/games/storelow/v2`);
-  url.searchParams.set("country", country);
-  url.searchParams.set("shops", shops.join(","));
-  url.searchParams.set("ids", ids.join(","));
+  
+  // POSTリクエストのためのボディを準備
+  const body = new URLSearchParams();
+  body.set("country", country);
+  body.set("shops", shops.join(","));
+  body.set("ids", ids.join(","));
+  if (API_KEY) {
+    body.set("key", API_KEY);
+  }
 
   const r = await itadFetch(url, {
-    method: "GET",
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: body.toString(),
     label: "storelow-v2",
   });
   return r.json();
@@ -202,11 +224,21 @@ export async function itadStoreLowV2(
 
 export async function itadOverviewV2(ids: string[], country = JP) {
   const url = new URL(`${ITAD_BASE}/games/overview/v2`);
-  url.searchParams.set("country", country);
-  url.searchParams.set("ids", ids.join(","));
+  
+  // POSTリクエストのためのボディを準備
+  const body = new URLSearchParams();
+  body.set("country", country);
+  body.set("ids", ids.join(","));
+  if (API_KEY) {
+    body.set("key", API_KEY);
+  }
 
   const r = await itadFetch(url, {
-    method: "GET",
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: body.toString(),
     label: "overview-v2",
   });
   return r.json();
