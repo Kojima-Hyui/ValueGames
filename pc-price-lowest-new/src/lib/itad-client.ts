@@ -10,6 +10,11 @@ const ITAD_BASE = "https://api.isthereanydeal.com";
 // 今回は制限付きでデモ用の実装を提供します
 const API_KEY = process.env.NEXT_PUBLIC_ITAD_API_KEY;
 
+// デバッグ用
+if (typeof window !== 'undefined') {
+  console.log('[ITAD Client] API_KEY status:', API_KEY ? 'set' : 'not set');
+}
+
 // PC向けデフォルト
 export const JP = "JP";
 export const SHOPS_PC = [61, 16, 35, 37, 48, 6, 36]; // Steam, Epic Games Store, GOG, Humble Store, Microsoft Store, Fanatical, GreenManGaming
@@ -27,9 +32,9 @@ async function sleep(ms: number) {
 // クライアントサイド用のfetch関数
 export async function itadFetch(url: URL | string, opts: FetchOpts = {}) {
   if (!API_KEY) {
-    console.warn("[ITAD Client] API key not available in client environment");
-    // GitHub Pages環境では制限付きでテストデータを返すか、エラーを投げる
-    throw new Error("API key required for ITAD API access");
+    console.error("[ITAD Client] API key not available in client environment");
+    console.error("[ITAD Client] NEXT_PUBLIC_ITAD_API_KEY:", process.env.NEXT_PUBLIC_ITAD_API_KEY);
+    throw new Error("API key required for ITAD API access - check environment variables");
   }
 
   const { retries = 2, retryDelayMs = 600, label = "itad", ...init } = opts;
