@@ -10,6 +10,8 @@ const nextConfig: NextConfig = {
   // 例: https://username.github.io/repo-name/
   basePath: '/ValueGames',
   assetPrefix: '/ValueGames',
+  // キャッシュ無効化のため
+  generateBuildId: () => 'build-' + Date.now(),
 };
 
 export default nextConfig;
