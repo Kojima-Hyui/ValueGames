@@ -8,8 +8,8 @@ const nextConfig: NextConfig = {
   },
   // GitHub Pagesの場合、リポジトリ名がbasePathになります
   // 例: https://username.github.io/repo-name/
-  // basePath: '/pc-price-lowest-new',
-  // assetPrefix: '/pc-price-lowest-new',
+  basePath: '/pc-price-lowest-new',
+  assetPrefix: '/pc-price-lowest-new',
 };
 
 export default nextConfig;
