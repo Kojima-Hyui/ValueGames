@@ -94,10 +94,9 @@ async function sleep(ms: number) {
 
 // クライアントサイド用のfetch関数
 export async function itadFetch(url: URL | string, opts: FetchOpts = {}) {
+  // API keyが無い場合は警告を出すが処理を続行（プロキシ経由でアクセス）
   if (!API_KEY) {
-    console.error("[ITAD Client] API key not available in client environment");
-    console.error("[ITAD Client] NEXT_PUBLIC_ITAD_API_KEY:", process.env.NEXT_PUBLIC_ITAD_API_KEY);
-    throw new Error("API key required for ITAD API access - check environment variables");
+    console.warn("[ITAD Client] API key not available - proceeding with proxy access");
   }
 
   const { retries = 2, retryDelayMs = 600, label = "itad", ...init } = opts;
@@ -221,20 +220,26 @@ export async function itadOverviewV2(ids: string[], country = JP) {
 
 // クライアントサイドでの価格データ取得
 export async function getQuoteData(itadId: string) {
+  console.log('[ITAD Client] Attempting to fetch real data via CORS proxy for:', itadId);
+  
   try {
-    // CORS制限回避のため、プロキシ経由でAPIを呼び出し
-    console.log('[ITAD Client] Fetching real data via CORS proxy');
-    
+    // プロキシ経由でAPIを呼び出し
     const pricesData = await itadPricesV3([itadId]);
+    console.log('[ITAD Client] Prices data received:', pricesData);
+    
     const overviewData = await itadOverviewV2([itadId]);
+    console.log('[ITAD Client] Overview data received:', overviewData);
     
     const gameInfo = pricesData?.data?.[itadId];
     const gameOverview = overviewData?.data?.[itadId];
     
-    if (!gameInfo) {
-      console.warn('[ITAD Client] No price data found, using mock data');
+    if (!gameInfo || !gameInfo.list || gameInfo.list.length === 0) {
+      console.warn('[ITAD Client] No price data found in API response, using mock data');
+      console.log('[ITAD Client] API Response structure:', { pricesData, gameInfo });
       return generateMockGameData(itadId);
     }
+    
+    console.log('[ITAD Client] Successfully processing real API data');
     
     // 実際のAPIデータを変換
     const storeRows = (gameInfo.list || []).map((deal: ITADDeal) => ({
@@ -255,7 +260,7 @@ export async function getQuoteData(itadId: string) {
       timestamp: gameOverview.lowest.added || new Date().toISOString()
     } : null;
     
-    return {
+    const result = {
       data: {
         [itadId]: {
           title: gameInfo.title || gameOverview?.title || 'Unknown Game',
@@ -267,9 +272,11 @@ export async function getQuoteData(itadId: string) {
       }
     };
     
+    console.log('[ITAD Client] Real API data successfully processed:', result);
+    return result;
+    
   } catch (error) {
-    console.error('[ITAD Client] Real API failed, falling back to mock data:', error);
-    // APIエラー時はモックデータにフォールバック
+    console.error('[ITAD Client] API call failed, falling back to mock data:', error);
     return generateMockGameData(itadId);
   }
 }
