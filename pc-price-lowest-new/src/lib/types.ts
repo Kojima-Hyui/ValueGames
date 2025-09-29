@@ -56,6 +56,42 @@ export interface BundleInfo {
   priceJPY?: number;
 }
 
+export interface ITADDeal {
+  shop: { id: number; name: string };
+  price?: { amountInt?: number; amount?: number; currency?: string };
+  regular?: { amountInt?: number; amount?: number };
+  cut?: number;
+  url?: string;
+  timestamp?: string;
+}
+
+export interface ITADGame {
+  deals?: ITADDeal[];
+  title?: string;
+}
+
+export interface ITADStoreLow {
+  shop: { id: number; name: string };
+  price?: { amountInt?: number; amount?: number } | number;
+  added?: string;
+  recorded?: string;
+}
+
+export interface ITADOverview {
+  title?: string;
+  lowest?: {
+    price?: { amountInt?: number; amount?: number } | number;
+    shop?: { name?: string };
+    added?: string;
+  };
+}
+
+export interface ITADBundle {
+  title?: string;
+  url?: string;
+  tiers?: Array<{ price?: { amountInt?: number } }>;
+}
+
 export interface QuoteResponse {
   data: {
     [gameId: string]: {

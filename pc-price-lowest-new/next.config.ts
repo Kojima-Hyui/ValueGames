@@ -1,7 +1,15 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  output: 'export',
+  trailingSlash: true,
+  images: {
+    unoptimized: true,
+  },
+  // GitHub Pagesの場合、リポジトリ名がbasePathになります
+  // 例: https://username.github.io/repo-name/
+  // basePath: '/pc-price-lowest-new',
+  // assetPrefix: '/pc-price-lowest-new',
 };
 
 export default nextConfig;
