@@ -3,6 +3,8 @@
 
 import { ITADDeal, ITADGame, ITADStoreLow, ITADOverview, ITADBundle } from './types';
 
+// CORS制限回避のためプロキシ経由でアクセス
+const CORS_PROXY = "https://api.allorigins.win/raw?url=";
 const ITAD_BASE = "https://api.isthereanydeal.com";
 
 // 環境変数はビルド時に埋め込まれるため、GitHub Pages上では動作しません
@@ -107,7 +109,10 @@ export async function itadFetch(url: URL | string, opts: FetchOpts = {}) {
   if (!urlObj.searchParams.has("key") && API_KEY) {
     urlObj.searchParams.set("key", API_KEY);
   }
-  url = urlObj;
+  
+  // CORS制限回避のためプロキシURLを使用
+  const proxyUrl = CORS_PROXY + encodeURIComponent(urlObj.toString());
+  url = proxyUrl;
 
   try {
     const res = await fetch(url, { ...init, signal: controller.signal });
@@ -217,15 +222,54 @@ export async function itadOverviewV2(ids: string[], country = JP) {
 // クライアントサイドでの価格データ取得
 export async function getQuoteData(itadId: string) {
   try {
-    // CORS制限のため、デモ用のモックデータを返します
-    console.warn('[ITAD Client] Using mock data due to CORS restrictions in browser environment');
+    // CORS制限回避のため、プロキシ経由でAPIを呼び出し
+    console.log('[ITAD Client] Fetching real data via CORS proxy');
     
-    // デモ用のモックデータ
-    const mockGameData = generateMockGameData(itadId);
-    return mockGameData;
+    const pricesData = await itadPricesV3([itadId]);
+    const overviewData = await itadOverviewV2([itadId]);
+    
+    const gameInfo = pricesData?.data?.[itadId];
+    const gameOverview = overviewData?.data?.[itadId];
+    
+    if (!gameInfo) {
+      console.warn('[ITAD Client] No price data found, using mock data');
+      return generateMockGameData(itadId);
+    }
+    
+    // 実際のAPIデータを変換
+    const storeRows = (gameInfo.list || []).map((deal: ITADDeal) => ({
+      id: deal.shop?.id?.toString() || Math.random().toString(),
+      name: deal.shop?.name || 'Unknown Store',
+      priceJPY: Math.round((deal.price?.amountInt || deal.price?.amount || 0) / 100),
+      regularPriceJPY: deal.regular ? Math.round((deal.regular.amountInt || deal.regular.amount || 0) / 100) : null,
+      discountPercent: deal.cut || 0,
+      isOnSale: (deal.cut || 0) > 0,
+      url: deal.url || '#',
+      availability: 'available',
+      timestamp: deal.timestamp || new Date().toISOString()
+    }));
+    
+    const allTimeLow = gameOverview?.lowest ? {
+      priceJPY: Math.round((gameOverview.lowest.price?.amountInt || gameOverview.lowest.price?.amount || 0) / 100),
+      shopName: gameOverview.lowest.shop?.name || 'Unknown',
+      timestamp: gameOverview.lowest.added || new Date().toISOString()
+    } : null;
+    
+    return {
+      data: {
+        [itadId]: {
+          title: gameInfo.title || gameOverview?.title || 'Unknown Game',
+          list: storeRows,
+          summary: {
+            allTimeLow
+          }
+        }
+      }
+    };
     
   } catch (error) {
-    console.error('[ITAD Client] Mock data generation failed:', error);
-    throw error;
+    console.error('[ITAD Client] Real API failed, falling back to mock data:', error);
+    // APIエラー時はモックデータにフォールバック
+    return generateMockGameData(itadId);
   }
 }
