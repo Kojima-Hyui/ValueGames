@@ -15,6 +15,7 @@ const API_KEY = process.env.NEXT_PUBLIC_ITAD_API_KEY;
 // デバッグ用
 if (typeof window !== 'undefined') {
   console.log('[ITAD Client] API_KEY status:', API_KEY ? 'set' : 'not set');
+  console.log('[ITAD Client] Using REAL API integration with CORS proxy');
 }
 
 // モックデータ生成関数
