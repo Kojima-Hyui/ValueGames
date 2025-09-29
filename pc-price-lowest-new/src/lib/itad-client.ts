@@ -3,8 +3,14 @@
 
 import { ITADDeal, ITADGame, ITADStoreLow, ITADOverview, ITADBundle } from './types';
 
-// CORS制限回避のためプロキシ経由でアクセス
-const CORS_PROXY = "https://api.allorigins.win/raw?url=";
+// CORS制限回避のため複数のプロキシを試行
+const CORS_PROXIES = [
+  "https://cors-anywhere.herokuapp.com/",
+  "https://api.codetabs.com/v1/proxy/?quest=",
+  "https://corsproxy.io/?",
+  // バックアップ用（最後の手段）
+  ""
+];
 const ITAD_BASE = "https://api.isthereanydeal.com";
 
 // 環境変数はビルド時に埋め込まれるため、GitHub Pages上では動作しません
@@ -93,13 +99,8 @@ async function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-// クライアントサイド用のfetch関数
+// クライアントサイド用のfetch関数 - 複数プロキシ対応
 export async function itadFetch(url: URL | string, opts: FetchOpts = {}) {
-  // API keyが無い場合は警告を出すが処理を続行（プロキシ経由でアクセス）
-  if (!API_KEY) {
-    console.warn("[ITAD Client] API key not available - proceeding with proxy access");
-  }
-
   const { retries = 2, retryDelayMs = 600, label = "itad", ...init } = opts;
 
   const controller = new AbortController();
@@ -110,53 +111,45 @@ export async function itadFetch(url: URL | string, opts: FetchOpts = {}) {
     urlObj.searchParams.set("key", API_KEY);
   }
   
-  // CORS制限回避のためプロキシURLを使用
-  const proxyUrl = CORS_PROXY + encodeURIComponent(urlObj.toString());
-  url = proxyUrl;
-
-  try {
-    const res = await fetch(url, { ...init, signal: controller.signal });
-
-    if (res.ok) return res;
-
-    if ((res.status === 429 || res.status >= 500) && retries > 0) {
-      console.warn(
-        `[ITAD ${label}] ${res.status} ${res.statusText} -> retrying... (${retries} left)`
-      );
-      await sleep(retryDelayMs);
-      return itadFetch(url, {
-        ...init,
-        retries: retries - 1,
-        retryDelayMs: retryDelayMs * 2,
-        label,
-      });
+  // 複数のプロキシを順番に試行
+  for (let proxyIndex = 0; proxyIndex < CORS_PROXIES.length; proxyIndex++) {
+    const proxy = CORS_PROXIES[proxyIndex];
+    const proxyUrl = proxy ? proxy + encodeURIComponent(urlObj.toString()) : urlObj.toString();
+    
+    console.log(`[ITAD ${label}] Trying proxy ${proxyIndex + 1}/${CORS_PROXIES.length}: ${proxy || 'direct'}`);
+    
+    try {
+      const res = await fetch(proxyUrl, { ...init, signal: controller.signal });
+      
+      if (res.ok) {
+        console.log(`[ITAD ${label}] Success with proxy ${proxyIndex + 1}`);
+        return res;
+      }
+      
+      console.warn(`[ITAD ${label}] Proxy ${proxyIndex + 1} failed: ${res.status} ${res.statusText}`);
+    } catch (error) {
+      console.warn(`[ITAD ${label}] Proxy ${proxyIndex + 1} error:`, error);
     }
-
-    const text = await res.text().catch(() => "");
-    throw new Error(
-      `HTTP ${res.status}: ${res.statusText} ${
-        text ? `| body=${text.slice(0, 256)}` : ""
-      }`
-    );
-  } catch (err: unknown) {
-    if (retries > 0) {
-      console.warn(
-        `[ITAD ${label}] error: ${
-          err instanceof Error ? err.message : String(err)
-        } -> retrying... (${retries} left)`
-      );
-      await sleep(retryDelayMs);
-      return itadFetch(url, {
-        ...init,
-        retries: retries - 1,
-        retryDelayMs: retryDelayMs * 2,
-        label,
-      });
-    }
-    throw err;
-  } finally {
-    clearTimeout(t);
   }
+
+  // すべてのプロキシが失敗した場合
+  const finalError = new Error(`All CORS proxies failed for ${label}`);
+  
+  // リトライロジック
+  if (retries > 0) {
+    console.warn(`[ITAD ${label}] All proxies failed -> retrying... (${retries} left)`);
+    await sleep(retryDelayMs);
+    clearTimeout(t);
+    return itadFetch(url, {
+      ...init,
+      retries: retries - 1,
+      retryDelayMs: retryDelayMs * 2,
+      label,
+    });
+  }
+  
+  clearTimeout(t);
+  throw finalError;
 }
 
 export async function itadSearchByTitle(query: string, results = 20) {
