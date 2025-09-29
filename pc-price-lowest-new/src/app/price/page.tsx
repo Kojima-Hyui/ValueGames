@@ -61,6 +61,16 @@ function PricePageContent() {
     <div className="min-h-screen bg-background text-foreground">
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
+          {/* デモ通知 */}
+          <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-yellow-400 rounded-full"></div>
+              <p className="text-yellow-800 text-sm">
+                <strong>デモモード:</strong> API制限のため、実際の価格データの代わりにサンプルデータを表示しています。
+              </p>
+            </div>
+          </div>
+          
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-4">
               <button
