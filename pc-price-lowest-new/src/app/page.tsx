@@ -2,12 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useDebounce } from "@/hooks/useDebounce";
 
 export default function SearchPage() {
   const [query, setQuery] = useState("");
   const router = useRouter();
-  const debouncedQuery = useDebounce(query, 300);
 
   const handleSearch = () => {
     if (query.trim()) {

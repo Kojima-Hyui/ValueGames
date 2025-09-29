@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 interface Game {
   id: string;
@@ -69,9 +70,11 @@ export function SearchResults({ games, isLoading, query }: SearchResultsProps) {
             >
               <div className="flex items-center gap-4">
                 {game.assets?.banner145 ? (
-                  <img
+                  <Image
                     src={game.assets.banner145}
                     alt={game.title}
+                    width={64}
+                    height={64}
                     className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;

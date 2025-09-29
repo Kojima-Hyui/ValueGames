@@ -13,15 +13,15 @@ export async function GET(req: NextRequest) {
     const results = await itadSearchByTitle(query.trim(), 20);
     
     // フィルタリング: ゲームのみ（DLCやパッケージを除外）
-    const games = results.filter((item: any) => 
+    const games = results.filter((item: { type?: string }) => 
       item.type === "game" || !item.type
     );
 
     return NextResponse.json({ data: games }, {
       headers: { "Cache-Control": "s-maxage=300, stale-while-revalidate=60" },
     });
-  } catch (error: any) {
-    console.error("Search API error:", error?.message ?? error);
+  } catch (error: unknown) {
+    console.error("Search API error:", error instanceof Error ? error.message : error);
     return NextResponse.json({ error: "Search failed" }, { status: 500 });
   }
 }

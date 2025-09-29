@@ -80,11 +80,11 @@ export async function itadFetch(url: URL | string, opts: FetchOpts = {}) {
         text ? `| body=${text.slice(0, 256)}` : ""
       }`
     );
-  } catch (err: any) {
+  } catch (err: unknown) {
     if (retries > 0) {
       console.warn(
         `[ITAD ${label}] error: ${
-          err?.message ?? err
+          err instanceof Error ? err.message : err
         } -> retrying... (${retries} left) ${urlStr}`
       );
       await sleep(retryDelayMs);

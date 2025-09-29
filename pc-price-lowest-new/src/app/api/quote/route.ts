@@ -7,14 +7,83 @@ import {
   SHOPS_PC,
 } from "@/lib/itad";
 
+interface Shop {
+  id: number;
+  name: string;
+}
+
+interface Price {
+  amountInt?: number;
+  amount?: number;
+  currency?: string;
+}
+
+interface Deal {
+  shop: Shop;
+  price?: Price;
+  regular?: Price;
+  cut?: number;
+  url?: string;
+  timestamp?: string;
+}
+
+interface StoreLow {
+  shop: Shop;
+  price?: Price | number;
+  added?: string;
+  recorded?: string;
+}
+
+interface PricesData {
+  title?: string;
+  deals?: Deal[];
+}
+
+interface StoreLowData {
+  lows?: StoreLow[];
+}
+
+interface OverviewData {
+  title?: string;
+  lowest?: {
+    price?: Price | number;
+    shop?: Shop;
+    added?: string;
+  };
+}
+
+interface SubscriptionInfo {
+  service: string;
+  type: "subscription" | "free";
+}
+
+interface StoreRow {
+  storeId: number;
+  storeName: string;
+  now?: {
+    price: number | null;
+    regularPrice: number | null;
+    cut: number;
+    isOnSale: boolean;
+    subscriptionInfo: SubscriptionInfo | null;
+    currency: string;
+    url: string;
+    ts: string;
+  };
+  storeLowAll?: {
+    price: number | null;
+    date: string;
+  };
+}
+
 // map helpers
 const ensureRow = (
-  map: Map<number, any>,
+  map: Map<number, StoreRow>,
   shop: { id: number; name: string }
-) => {
+): StoreRow => {
   const cur = map.get(shop.id);
   if (cur) return cur;
-  const row = { storeId: shop.id, storeName: shop.name } as any;
+  const row: StoreRow = { storeId: shop.id, storeName: shop.name };
   map.set(shop.id, row);
   return row;
 };
@@ -39,33 +108,33 @@ export async function POST(req: NextRequest) {
       }).then(res => res.json())
     ]);
 
-    const priceMap = new Map<number, any>();
-    const p0 = prices?.[0];
-    const bundleInfo = priceOverview?.bundles || [];
+    const priceMap = new Map<number, StoreRow>();
+    const p0 = prices?.[0] as PricesData | undefined;
+    const bundleInfo = (priceOverview as { bundles?: Array<{ title?: string; url?: string; tiers?: Array<{ price?: { amountInt?: number } }> }> })?.bundles || [];
     
     // キャッシュからゲーム名を取得（セッションストレージなど）
     // 今回は簡単にoverviewとpricesから推測
     const gameTitle = overview?.[0]?.title || p0?.title || itadId;
 
     // 現在価格
-    (p0?.deals ?? []).forEach((d: any) => {
+    (p0?.deals ?? []).forEach((d: Deal) => {
       const row = ensureRow(priceMap, d.shop);
       const price = d.price?.amountInt ?? d.price?.amount ?? null;
       const regularPrice = d.regular?.amountInt ?? d.regular?.amount ?? null;
       const cut = d.cut ?? 0;
       
       // セール状態を判定
-      const isOnSale = cut > 0 && regularPrice && price && price < regularPrice;
+      const isOnSale = Boolean(cut > 0 && regularPrice && price && price < regularPrice);
       
       // サブスクリプション判定（価格が0円かつ特定ストア）
-      let subscriptionInfo = null;
+      let subscriptionInfo: SubscriptionInfo | null = null;
       if (price === 0) {
         switch (d.shop?.id) {
           case 48: // Microsoft Store
-            subscriptionInfo = { service: "Xbox Game Pass", type: "subscription" };
+            subscriptionInfo = { service: "Xbox Game Pass", type: "subscription" as const };
             break;
           case 16: // Epic Games Store
-            subscriptionInfo = { service: "Epic Games Store", type: "free" };
+            subscriptionInfo = { service: "Epic Games Store", type: "free" as const };
             break;
         }
       }
@@ -85,28 +154,28 @@ export async function POST(req: NextRequest) {
     });
 
     // 全期間の店別最安
-    const sl0 = storeLows?.[0];
-    (sl0?.lows ?? []).forEach((low: any) => {
+    const sl0 = storeLows?.[0] as StoreLowData | undefined;
+    (sl0?.lows ?? []).forEach((low: StoreLow) => {
       const row = ensureRow(priceMap, low.shop);
       row.storeLowAll = {
-        price: low.price?.amountInt ?? low.price?.amount ?? low.price ?? null,
+        price: typeof low.price === 'object' && low.price ? 
+          (low.price.amountInt ?? low.price.amount ?? null) : 
+          (typeof low.price === 'number' ? low.price : null),
         date: low.added ?? low.recorded ?? "",
       };
     });
 
     // 全体の歴代最安とゲーム情報
-    const ov0 = overview?.[0];
+    const ov0 = overview?.[0] as OverviewData | undefined;
     console.log(`[Quote API] Overview:`, JSON.stringify(ov0, null, 2));
     console.log(`[Quote API] Game title: ${gameTitle}`);
     
     const summary = ov0?.lowest
       ? {
           allTimeLow: {
-            price:
-              ov0.lowest.price?.amountInt ??
-              ov0.lowest.price?.amount ??
-              ov0.lowest.price ??
-              null,
+            price: typeof ov0.lowest.price === 'object' && ov0.lowest.price ?
+              (ov0.lowest.price.amountInt ?? ov0.lowest.price.amount ?? null) :
+              (typeof ov0.lowest.price === 'number' ? ov0.lowest.price : null),
             store: ov0.lowest.shop?.name ?? "",
             date: ov0.lowest.added ?? "",
           },
@@ -128,17 +197,17 @@ export async function POST(req: NextRequest) {
             .map((store) => ({
               id: store.storeId.toString(),
               name: store.storeName,
-              priceJPY: store.now.price,
+              priceJPY: store.now!.price,
               regularPriceJPY:
-                typeof store.now?.regularPrice === "number" ? store.now.regularPrice : null,
-              discountPercent: store.now?.cut || 0,
-              isOnSale: store.now?.isOnSale || false,
-              url: store.now?.url || "",
-              availability: store.now?.price ? "available" : "unavailable",
-              timestamp: store.now?.ts || new Date().toISOString(),
-              subscriptionInfo: store.now?.subscriptionInfo || null,
+                typeof store.now!.regularPrice === "number" ? store.now!.regularPrice : null,
+              discountPercent: store.now!.cut || 0,
+              isOnSale: store.now!.isOnSale || false,
+              url: store.now!.url || "",
+              availability: store.now!.price ? "available" : "unavailable",
+              timestamp: store.now!.ts || new Date().toISOString(),
+              subscriptionInfo: store.now!.subscriptionInfo || null,
             })),
-          bundleInfo: bundleInfo?.map((bundle: any) => ({
+          bundleInfo: bundleInfo?.map((bundle: { title?: string; url?: string; tiers?: Array<{ price?: { amountInt?: number } }> }) => ({
             name: bundle.title || '',
             url: bundle.url || '',
             priceJPY: bundle.tiers?.[0]?.price?.amountInt || 0,
@@ -175,8 +244,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(responseData, {
       headers: { "Cache-Control": "s-maxage=300, stale-while-revalidate=60" },
     });
-  } catch (e: any) {
-    console.error("Quote API error:", e?.message ?? e);
+  } catch (e: unknown) {
+    console.error("Quote API error:", e instanceof Error ? e.message : e);
     return NextResponse.json({ error: "itad quote failed" }, { status: 500 });
   }
 }
