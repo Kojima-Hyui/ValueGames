@@ -26,7 +26,7 @@ export function SearchResults({ games, isLoading, query }: SearchResultsProps) {
 
   const handleGameClick = (game: Game) => {
     const title = encodeURIComponent(game.title);
-    router.push(`/price/${game.id}?title=${title}`);
+    router.push(`/price?id=${game.id}&title=${title}`);
   };
 
   if (!query) return null;

@@ -1,36 +1,67 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PC Price Lowest New
 
-## Getting Started
+ゲーム価格比較アプリケーション
 
-First, run the development server:
+## 機能
+
+- IsThereAnyDeal APIを使用したゲーム検索
+- 複数ストアでの価格比較
+- 現在価格と歴代最安値の表示
+- サブスクリプションサービス対応（Xbox Game Pass、Epic Games Storeの無料ゲーム）
+
+## GitHub Pagesへのデプロイ
+
+このプロジェクトはGitHub Pagesで静的サイトとしてホストできるよう設定されています。
+
+### セットアップ手順
+
+1. **リポジトリをGitHubにプッシュ**
+
+2. **GitHub Pagesを有効化**
+   - リポジトリの Settings > Pages
+   - Source: "GitHub Actions" を選択
+
+3. **環境変数の設定（オプション）**
+   - IsThereAnyDeal APIキーを使用する場合
+   - リポジトリの Settings > Secrets and variables > Actions
+   - `NEXT_PUBLIC_ITAD_API_KEY` を追加
+
+4. **basePathの設定（必要に応じて）**
+   - `next.config.ts` で以下を有効化：
+   ```typescript
+   basePath: '/pc-price-lowest-new',
+   assetPrefix: '/pc-price-lowest-new',
+   ```
+
+5. **自動デプロイ**
+   - `main` ブランチへのプッシュで自動デプロイ
+   - GitHub Actionsがビルドと公開を実行
+
+### 開発環境
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### ビルド
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run build
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+静的ファイルは `out/` ディレクトリに生成されます。
 
-## Learn More
+## 技術スタック
 
-To learn more about Next.js, take a look at the following resources:
+- Next.js (App Router)
+- TypeScript
+- Tailwind CSS
+- React Query (TanStack Query)
+- IsThereAnyDeal API
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 注意事項
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- APIキーはクライアントサイドで使用されるため、パブリックキーのみ使用してください
+- GitHub Pages環境では制限があるため、一部の機能が動作しない場合があります
+# Force workflow restart

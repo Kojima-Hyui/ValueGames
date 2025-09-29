@@ -1,8 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // 本番デプロイ設定
-  output: 'standalone', // Docker や Node.js サーバー用
+  // Vercel用設定（GitHub Pagesとの統合）
   images: {
     remotePatterns: [
       {

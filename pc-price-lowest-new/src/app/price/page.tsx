@@ -1,31 +1,24 @@
 "use client";
 
+import { Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { PriceTable } from "@/components/PriceTable";
 import { QuoteResponse } from "@/lib/types";
+import { getQuoteData } from "@/lib/itad-client";
 
 async function fetchQuote(itadId: string): Promise<QuoteResponse> {
-  const response = await fetch("/api/quote", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ itadId }),
-  });
-
-  if (!response.ok) {
+  try {
+    return await getQuoteData(itadId);
+  } catch {
     throw new Error("Failed to fetch quote");
   }
-
-  return response.json();
 }
 
-export default function PricePage() {
-  const params = useParams();
+function PricePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const itadId = params.itadId as string;
+  const itadId = searchParams.get("id");
   const titleFromUrl = searchParams.get("title");
 
   const {
@@ -34,11 +27,11 @@ export default function PricePage() {
     error,
   } = useQuery({
     queryKey: ["quote", itadId],
-    queryFn: () => fetchQuote(itadId),
+    queryFn: () => fetchQuote(itadId!),
     enabled: !!itadId,
   });
 
-  const gameData = quoteData?.data?.[itadId];
+  const gameData = quoteData?.data?.[itadId!];
 
   const handleBackToSearch = () => {
     router.back();
@@ -48,10 +41,36 @@ export default function PricePage() {
     router.push("/");
   };
 
+  if (!itadId) {
+    return (
+      <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">ゲームIDが指定されていません。</p>
+          <button
+            onClick={handleNewSearch}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            ホームに戻る
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
+          {/* API状況通知 */}
+          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-blue-400 rounded-full"></div>
+              <p className="text-blue-800 text-sm">
+                <strong>リアルタイム価格:</strong> IsThereAnyDeal APIから最新の価格情報を取得しています。
+              </p>
+            </div>
+          </div>
+          
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-4">
               <button
@@ -98,5 +117,15 @@ export default function PricePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PricePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background text-foreground flex items-center justify-center">
+      <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+    </div>}>
+      <PricePageContent />
+    </Suspense>
   );
 }
