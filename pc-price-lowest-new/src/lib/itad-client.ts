@@ -115,11 +115,10 @@ export async function itadPricesV3(
   url.searchParams.set("country", country);
   url.searchParams.set("shops", shops.join(","));
   url.searchParams.set("deals", "false");
+  url.searchParams.set("ids", ids.join(","));
 
   const r = await itadFetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(ids),
+    method: "GET",
     label: "prices-v3",
   });
   return r.json();
@@ -133,11 +132,10 @@ export async function itadStoreLowV2(
   const url = new URL(`${ITAD_BASE}/games/storelow/v2`);
   url.searchParams.set("country", country);
   url.searchParams.set("shops", shops.join(","));
+  url.searchParams.set("ids", ids.join(","));
 
   const r = await itadFetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(ids),
+    method: "GET",
     label: "storelow-v2",
   });
   return r.json();
@@ -146,11 +144,10 @@ export async function itadStoreLowV2(
 export async function itadOverviewV2(ids: string[], country = JP) {
   const url = new URL(`${ITAD_BASE}/games/overview/v2`);
   url.searchParams.set("country", country);
+  url.searchParams.set("ids", ids.join(","));
 
   const r = await itadFetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(ids),
+    method: "GET",
     label: "overview-v2",
   });
   return r.json();
@@ -163,11 +160,7 @@ export async function getQuoteData(itadId: string) {
       itadPricesV3([itadId], JP, SHOPS_PC),
       itadStoreLowV2([itadId], JP, SHOPS_PC),
       itadOverviewV2([itadId], JP),
-      fetch(`${ITAD_BASE}/games/overview/v2?country=${JP}&key=${API_KEY}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify([itadId])
-      }).then(res => res.json()) as Promise<{ bundles?: ITADBundle[] }>
+      itadOverviewV2([itadId], JP) // bundles情報も含まれる
     ]);
 
     // サーバーサイドのロジックと同様の処理
