@@ -64,3 +64,4 @@ npm run build
 
 - APIキーはクライアントサイドで使用されるため、パブリックキーのみ使用してください
 - GitHub Pages環境では制限があるため、一部の機能が動作しない場合があります
+# Force workflow restart
