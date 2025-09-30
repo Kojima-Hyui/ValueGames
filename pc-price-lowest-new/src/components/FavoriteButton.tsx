@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useFavorites, FavoriteGame } from "@/hooks/useFavorites";
 
 interface FavoriteButtonProps {
@@ -16,6 +17,7 @@ export function FavoriteButton({
   className = ""
 }: FavoriteButtonProps) {
   const { isFavorite, toggleFavorite, isLoaded } = useFavorites();
+  const [isProcessing, setIsProcessing] = useState(false);
 
   if (!isLoaded) {
     return null; // ローディング中は非表示
@@ -29,25 +31,40 @@ export function FavoriteButton({
     lg: "w-10 h-10 text-lg"
   };
 
-  const handleClick = (e: React.MouseEvent) => {
+  const handleClick = async (e: React.MouseEvent) => {
     e.stopPropagation(); // 親要素のクリックイベントを防ぐ
-    toggleFavorite(game);
+    
+    // 連続クリック防止
+    if (isProcessing) {
+      return;
+    }
+    
+    setIsProcessing(true);
+    try {
+      toggleFavorite(game);
+      // 短時間の遅延で連続クリックを防ぐ
+      await new Promise(resolve => setTimeout(resolve, 100));
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
     <button
       onClick={handleClick}
+      disabled={isProcessing}
       className={`
         inline-flex items-center gap-1 
         ${sizeClasses[size]} 
-        transition-all duration-200 hover:scale-110
+        transition-all duration-200 
+        ${isProcessing ? 'opacity-50 cursor-not-allowed' : 'hover:scale-110'}
         ${isLiked 
           ? 'text-red-500 hover:text-red-600' 
           : 'text-gray-400 hover:text-red-400'
         }
         ${className}
       `}
-      title={isLiked ? "お気に入りから削除" : "お気に入りに追加"}
+      title={isProcessing ? "処理中..." : (isLiked ? "お気に入りから削除" : "お気に入りに追加")}
     >
       <svg 
         className={`${sizeClasses[size]} ${isLiked ? 'fill-current' : 'fill-none'}`}

@@ -36,14 +36,17 @@ export function useFavorites() {
     }
   }, []);
 
-  // ローカルストレージに保存
-  const saveFavorites = (newFavorites: FavoriteGame[]) => {
-    try {
-      localStorage.setItem(FAVORITES_KEY, JSON.stringify(newFavorites));
-      setFavorites(newFavorites);
-    } catch (error) {
-      console.error("Failed to save favorites:", error);
-    }
+  // ローカルストレージに保存（関数型更新対応）
+  const saveFavorites = (updater: FavoriteGame[] | ((prev: FavoriteGame[]) => FavoriteGame[])) => {
+    setFavorites(prevFavorites => {
+      const newFavorites = typeof updater === 'function' ? updater(prevFavorites) : updater;
+      try {
+        localStorage.setItem(FAVORITES_KEY, JSON.stringify(newFavorites));
+      } catch (error) {
+        console.error("Failed to save favorites:", error);
+      }
+      return newFavorites;
+    });
   };
 
   // お気に入りに追加
@@ -53,14 +56,18 @@ export function useFavorites() {
       addedAt: new Date().toISOString(),
     };
     
-    const newFavorites = [...favorites, newFavorite];
-    saveFavorites(newFavorites);
+    saveFavorites(prevFavorites => {
+      // 既に存在する場合は追加しない
+      if (prevFavorites.some(fav => fav.id === game.id)) {
+        return prevFavorites;
+      }
+      return [...prevFavorites, newFavorite];
+    });
   };
 
   // お気に入りから削除
   const removeFavorite = (gameId: string) => {
-    const newFavorites = favorites.filter(fav => fav.id !== gameId);
-    saveFavorites(newFavorites);
+    saveFavorites(prevFavorites => prevFavorites.filter(fav => fav.id !== gameId));
   };
 
   // お気に入りかどうかチェック
@@ -68,13 +75,23 @@ export function useFavorites() {
     return favorites.some(fav => fav.id === gameId);
   };
 
-  // お気に入りをトグル
+  // お気に入りをトグル（最新の状態を参照）
   const toggleFavorite = (game: Omit<FavoriteGame, "addedAt">) => {
-    if (isFavorite(game.id)) {
-      removeFavorite(game.id);
-    } else {
-      addFavorite(game);
-    }
+    saveFavorites(prevFavorites => {
+      const isCurrentlyFavorite = prevFavorites.some(fav => fav.id === game.id);
+      
+      if (isCurrentlyFavorite) {
+        // 削除
+        return prevFavorites.filter(fav => fav.id !== game.id);
+      } else {
+        // 追加
+        const newFavorite: FavoriteGame = {
+          ...game,
+          addedAt: new Date().toISOString(),
+        };
+        return [...prevFavorites, newFavorite];
+      }
+    });
   };
 
   return {
