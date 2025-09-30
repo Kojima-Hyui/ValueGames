@@ -39,38 +39,65 @@ export function useFavorites() {
     }
   }, []);
 
-  // ローカルストレージに保存（キューイング対応）
+  // ローカルストレージから最新データを読み込んで状態を同期
+  const syncFromStorage = () => {
+    try {
+      const stored = localStorage.getItem(FAVORITES_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        const validData = Array.isArray(parsed) ? parsed : [];
+        console.log(`🔄 Syncing state from localStorage: ${validData.length} items`);
+        setFavorites(validData);
+        return validData;
+      }
+    } catch (error) {
+      console.error("Failed to sync from storage:", error);
+    }
+    return [];
+  };
+
+  // ローカルストレージに保存（同期対応）
   const saveFavorites = (updater: FavoriteGame[] | ((prev: FavoriteGame[]) => FavoriteGame[])) => {
-    setFavorites(prevFavorites => {
-      const newFavorites = typeof updater === 'function' ? updater(prevFavorites) : updater;
-      console.log(`💾 Saving to localStorage: ${newFavorites.length} items`);
-      console.log(`💾 Items:`, newFavorites.map(f => f.title));
-      
-      // ローカルストレージアクセスをキューイング
-      updateQueue = updateQueue.then(async () => {
-        try {
-          // 最新のローカルストレージ内容を確認
-          const currentStored = localStorage.getItem(FAVORITES_KEY);
-          const currentParsed = currentStored ? JSON.parse(currentStored) : [];
-          console.log(`📖 Current localStorage before update: ${currentParsed.length} items`);
-          
-          localStorage.setItem(FAVORITES_KEY, JSON.stringify(newFavorites));
-          console.log(`✅ Successfully saved to localStorage: ${newFavorites.length} items`);
-          
-          // 小さな遅延を追加して確実に書き込み完了を待つ
-          await new Promise(resolve => setTimeout(resolve, 10));
-          
-          // 確認のため即座に読み込み
-          const verification = localStorage.getItem(FAVORITES_KEY);
-          const parsed = verification ? JSON.parse(verification) : [];
-          console.log(`🔍 Verification - localStorage contains: ${parsed.length} items`);
-          console.log(`🔍 Verification items:`, parsed.map((f: FavoriteGame) => f.title));
-        } catch (error) {
-          console.error("❌ Failed to save favorites:", error);
-        }
-      });
-      
-      return newFavorites;
+    // まず最新のローカルストレージ状態を取得
+    const currentStoredData = (() => {
+      try {
+        const stored = localStorage.getItem(FAVORITES_KEY);
+        return stored ? JSON.parse(stored) : [];
+      } catch {
+        return [];
+      }
+    })();
+
+    // 最新のローカルストレージデータを基に更新を実行
+    const newFavorites = typeof updater === 'function' ? updater(currentStoredData) : updater;
+    console.log(`💾 Saving to localStorage: ${newFavorites.length} items`);
+    console.log(`💾 Items:`, newFavorites.map(f => f.title));
+    
+    // ローカルストレージアクセスをキューイング
+    updateQueue = updateQueue.then(async () => {
+      try {
+        // 最新のローカルストレージ内容を確認
+        const currentStored = localStorage.getItem(FAVORITES_KEY);
+        const currentParsed = currentStored ? JSON.parse(currentStored) : [];
+        console.log(`📖 Current localStorage before update: ${currentParsed.length} items`);
+        
+        localStorage.setItem(FAVORITES_KEY, JSON.stringify(newFavorites));
+        console.log(`✅ Successfully saved to localStorage: ${newFavorites.length} items`);
+        
+        // 小さな遅延を追加して確実に書き込み完了を待つ
+        await new Promise(resolve => setTimeout(resolve, 10));
+        
+        // 確認のため即座に読み込み
+        const verification = localStorage.getItem(FAVORITES_KEY);
+        const parsed = verification ? JSON.parse(verification) : [];
+        console.log(`🔍 Verification - localStorage contains: ${parsed.length} items`);
+        console.log(`🔍 Verification items:`, parsed.map((f: FavoriteGame) => f.title));
+        
+        // React状態も同期
+        setFavorites(parsed);
+      } catch (error) {
+        console.error("❌ Failed to save favorites:", error);
+      }
     });
   };
 
@@ -95,9 +122,23 @@ export function useFavorites() {
     saveFavorites(prevFavorites => prevFavorites.filter(fav => fav.id !== gameId));
   };
 
-  // お気に入りかどうかチェック
+  // お気に入りかどうかチェック（ローカルストレージから直接確認）
   const isFavorite = (gameId: string) => {
-    return favorites.some(fav => fav.id === gameId);
+    try {
+      const stored = localStorage.getItem(FAVORITES_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        const result = Array.isArray(parsed) ? parsed.some((fav: FavoriteGame) => fav.id === gameId) : false;
+        console.log(`🔍 isFavorite check for ${gameId}: ${result} (from localStorage)`);
+        return result;
+      }
+    } catch (error) {
+      console.error("Failed to check favorite from storage:", error);
+    }
+    // フォールバック: React状態から確認
+    const result = favorites.some(fav => fav.id === gameId);
+    console.log(`🔍 isFavorite fallback for ${gameId}: ${result} (from React state)`);
+    return result;
   };
 
   // お気に入りをトグル（最新の状態を参照）
