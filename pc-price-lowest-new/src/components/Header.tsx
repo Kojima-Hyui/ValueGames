@@ -96,12 +96,14 @@ export function Header({
             </div>
 
             {/* 中央のロゴ */}
-            <button
-              onClick={() => router.push('/')}
-              className="text-lg font-bold text-gray-900 hover:text-blue-600 transition-colors"
-            >
-              PC Price Lowest
-            </button>
+            <div className="absolute left-1/2 transform -translate-x-1/2">
+              <button
+                onClick={() => router.push('/')}
+                className="text-lg font-bold text-gray-900 hover:text-blue-600 transition-colors"
+              >
+                PC Price Lowest
+              </button>
+            </div>
 
             {/* 右側のお気に入り */}
             <button
