@@ -5,17 +5,16 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { SearchResults } from "@/components/SearchResults";
 import { useDebounce } from "@/hooks/useDebounce";
-import { itadSearchByTitle } from "@/lib/itad-client";
 
 async function searchGames(query: string) {
   if (!query.trim()) return { data: [] };
   
   try {
-    const results = await itadSearchByTitle(query.trim(), 20);
-    const games = results.filter((item: { type?: string }) => 
-      item.type === "game" || !item.type
-    );
-    return { data: games };
+    const response = await fetch(`/api/search?query=${encodeURIComponent(query.trim())}`);
+    if (!response.ok) {
+      throw new Error("検索に失敗しました");
+    }
+    return response.json();
   } catch {
     throw new Error("検索に失敗しました");
   }

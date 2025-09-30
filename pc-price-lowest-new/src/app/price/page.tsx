@@ -5,13 +5,24 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { PriceTable } from "@/components/PriceTable";
 import { QuoteResponse } from "@/lib/types";
-import { getQuoteData } from "@/lib/itad-client";
 
 async function fetchQuote(itadId: string): Promise<QuoteResponse> {
   try {
-    return await getQuoteData(itadId);
+    const response = await fetch('/api/quote', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ itadId }),
+    });
+    
+    if (!response.ok) {
+      throw new Error("価格データの取得に失敗しました");
+    }
+    
+    return response.json();
   } catch {
-    throw new Error("Failed to fetch quote");
+    throw new Error("価格データの取得に失敗しました");
   }
 }
 
