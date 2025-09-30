@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { SearchResults } from "@/components/SearchResults";
 import { useDebounce } from "@/hooks/useDebounce";
-import { useFavorites } from "@/hooks/useFavorites";
+import { Header } from "@/components/Header";
 
 async function searchGames(query: string) {
   if (!query.trim()) return { data: [] };
@@ -28,7 +28,6 @@ function SearchPageContent() {
   
   const [query, setQuery] = useState(initialQuery);
   const debouncedQuery = useDebounce(query, 300);
-  const { count } = useFavorites();
 
   // URL同期
   useEffect(() => {
@@ -50,36 +49,16 @@ function SearchPageContent() {
     enabled: debouncedQuery.trim().length > 0,
   });
 
-  const handleBackToHome = () => {
-    router.push("/");
-  };
-
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={handleBackToHome}
-                className="px-4 py-2 text-blue-600 hover:text-blue-800 transition-colors"
-              >
-                ← ホームに戻る
-              </button>
+      <Header showBackButton showSearchButton={false} />
+      
+      <div className="pt-16"> {/* ヘッダーの高さ分の余白 */}
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-8">
               <h1 className="text-2xl font-bold">ゲーム検索</h1>
             </div>
-            <button
-              onClick={() => router.push('/favorites')}
-              className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:text-blue-800 transition-colors"
-            >
-              <div className="w-5 h-5 text-red-500">
-                <svg className="w-full h-full fill-current" viewBox="0 0 24 24">
-                  <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-              </div>
-              <span className="text-sm font-medium">お気に入り ({count})</span>
-            </button>
-          </div>
 
           <div className="mb-8">
             <div className="relative">
@@ -112,11 +91,12 @@ function SearchPageContent() {
             </div>
           )}
 
-          <SearchResults
-            games={searchResults?.data || []}
-            isLoading={isLoading}
-            query={debouncedQuery}
-          />
+            <SearchResults
+              games={searchResults?.data || []}
+              isLoading={isLoading}
+              query={debouncedQuery}
+            />
+          </div>
         </div>
       </div>
     </div>

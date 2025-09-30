@@ -23,23 +23,24 @@ export default function SearchPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      {/* 固定ヘッダー */}
+      <div className="fixed top-0 right-0 z-10 p-4">
+        <button
+          onClick={() => router.push('/favorites')}
+          className="flex items-center gap-2 px-4 py-2 bg-white shadow-lg border border-gray-200 rounded-full text-blue-600 hover:text-blue-800 hover:shadow-xl transition-all duration-200"
+        >
+          <div className="w-5 h-5 text-red-500">
+            <svg className="w-full h-full fill-current" viewBox="0 0 24 24">
+              <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+          </div>
+          <span className="text-sm font-medium">お気に入り ({count})</span>
+        </button>
+      </div>
+
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto text-center">
-          <div className="flex justify-between items-center mb-8">
-            <div></div>
-            <h1 className="text-4xl font-bold">PC Price Lowest</h1>
-            <button
-              onClick={() => router.push('/favorites')}
-              className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:text-blue-800 transition-colors"
-            >
-              <div className="w-5 h-5 text-red-500">
-                <svg className="w-full h-full fill-current" viewBox="0 0 24 24">
-                  <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-              </div>
-              <span className="text-sm font-medium">お気に入り ({count})</span>
-            </button>
-          </div>
+          <h1 className="text-4xl font-bold mb-8">PC Price Lowest</h1>
           <p className="text-lg text-gray-600 mb-12">
             複数のストアからPCゲームの最安値を見つけよう
           </p>
