@@ -1,16 +1,86 @@
 "use client";
 
-import { Suspense } from "react";
+import React, { Suspense, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useFavorites } from "@/hooks/useFavorites";
+import { useFavorites, FavoriteGame } from "@/hooks/useFavorites";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { Header } from "@/components/Header";
 import Image from "next/image";
 import { format } from "date-fns";
 
+// ゲーム画像コンポーネント - 画像エラー時に新しいURLを取得
+function GameImage({ game }: { game: FavoriteGame }) {
+  const [imageError, setImageError] = useState(false);
+  const [refreshedImageUrl, setRefreshedImageUrl] = useState<string | null>(null);
+
+  const handleImageError = async () => {
+    console.error('Image load error for game:', game.title, 'URL:', game.assets?.banner145);
+    setImageError(true);
+    
+    // 新しい画像URLを取得を試行
+    try {
+      const response = await fetch('/api/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: game.title, limit: 1 }),
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        const foundGame = data.games?.find((g: any) => g.id === game.id);
+        if (foundGame?.assets?.banner145) {
+          console.log('Refreshed image URL for:', game.title, foundGame.assets.banner145);
+          setRefreshedImageUrl(foundGame.assets.banner145);
+          setImageError(false);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to refresh image URL:', error);
+    }
+  };
+
+  const currentImageUrl = refreshedImageUrl || game.assets?.banner145;
+
+  return (
+    <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center flex-shrink-0 border border-gray-300 relative">
+      {currentImageUrl && !imageError ? (
+        <Image
+          src={currentImageUrl}
+          alt={game.title}
+          width={64}
+          height={64}
+          className="w-16 h-16 object-cover rounded-lg"
+          onError={handleImageError}
+          onLoad={() => console.log('Image loaded successfully for game:', game.title)}
+        />
+      ) : (
+        <div className="text-center">
+          <div className="text-2xl mb-1">🎮</div>
+          <div className="text-xs text-gray-500 font-medium">No Image</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function FavoritesPageContent() {
   const router = useRouter();
   const { favorites, isLoaded } = useFavorites();
+
+  // デバッグ用: お気に入りデータの構造をログ出力
+  React.useEffect(() => {
+    if (isLoaded && favorites.length > 0) {
+      console.log('Favorites data structure:', favorites);
+      favorites.forEach(game => {
+        console.log(`Game: ${game.title}`, {
+          id: game.id,
+          hasAssets: !!game.assets,
+          banner145: game.assets?.banner145,
+          assets: game.assets
+        });
+      });
+    }
+  }, [favorites, isLoaded]);
 
   const handleGameClick = (gameId: string, title: string) => {
     router.push(`/price?id=${gameId}&title=${encodeURIComponent(title)}`);
@@ -73,30 +143,7 @@ function FavoritesPageContent() {
                 {favorites.map((game) => (
                   <div key={game.id} className="p-4 hover:bg-blue-50 transition-colors">
                     <div className="flex items-center gap-4">
-                      <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center flex-shrink-0 border border-gray-300 relative">
-                        {game.assets?.banner145 ? (
-                          <Image
-                            src={game.assets.banner145}
-                            alt={game.title}
-                            width={64}
-                            height={64}
-                            className="w-16 h-16 object-cover rounded-lg"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              target.style.display = 'none';
-                              const parent = target.parentElement;
-                              if (parent) {
-                                parent.innerHTML = '<div class="text-center"><div class="text-2xl mb-1">🎮</div><div class="text-xs text-gray-500 font-medium">No Image</div></div>';
-                              }
-                            }}
-                          />
-                        ) : (
-                          <div className="text-center">
-                            <div className="text-2xl mb-1">🎮</div>
-                            <div className="text-xs text-gray-500 font-medium">No Image</div>
-                          </div>
-                        )}
-                      </div>
+                      <GameImage game={game} />
                       
                       <div className="flex-1 min-w-0">
                         <h3 className="font-medium text-gray-900 truncate">{game.title}</h3>
