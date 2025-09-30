@@ -8,6 +8,16 @@ import { Header } from "@/components/Header";
 import Image from "next/image";
 import { format } from "date-fns";
 
+interface SearchGame {
+  id: string;
+  title: string;
+  assets?: {
+    banner145?: string;
+    banner300?: string;
+    boxart?: string;
+  };
+}
+
 // ゲーム画像コンポーネント - 画像エラー時に新しいURLを取得
 function GameImage({ game }: { game: FavoriteGame }) {
   const [imageError, setImageError] = useState(false);
@@ -27,7 +37,7 @@ function GameImage({ game }: { game: FavoriteGame }) {
       
       if (response.ok) {
         const data = await response.json();
-        const foundGame = data.games?.find((g: any) => g.id === game.id);
+        const foundGame = data.games?.find((g: SearchGame) => g.id === game.id);
         if (foundGame?.assets?.banner145) {
           console.log('Refreshed image URL for:', game.title, foundGame.assets.banner145);
           setRefreshedImageUrl(foundGame.assets.banner145);
