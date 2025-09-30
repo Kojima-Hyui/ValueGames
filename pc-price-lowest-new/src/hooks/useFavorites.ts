@@ -39,22 +39,6 @@ export function useFavorites() {
     }
   }, []);
 
-  // ローカルストレージから最新データを読み込んで状態を同期
-  const syncFromStorage = () => {
-    try {
-      const stored = localStorage.getItem(FAVORITES_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        const validData = Array.isArray(parsed) ? parsed : [];
-        console.log(`🔄 Syncing state from localStorage: ${validData.length} items`);
-        setFavorites(validData);
-        return validData;
-      }
-    } catch (error) {
-      console.error("Failed to sync from storage:", error);
-    }
-    return [];
-  };
 
   // ローカルストレージに保存（同期対応）
   const saveFavorites = (updater: FavoriteGame[] | ((prev: FavoriteGame[]) => FavoriteGame[])) => {

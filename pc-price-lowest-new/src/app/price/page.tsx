@@ -65,8 +65,8 @@ function PricePageContent() {
       <div className="pt-24"> {/* ヘッダーの高さ分の余白 */}
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-8 relative">
-              <h1 className="text-2xl font-bold">
+            <div className="text-center mb-12 relative animate-fade-in">
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
                 価格比較: {titleFromUrl || gameData?.title || itadId}
               </h1>
               <div className="absolute top-0 right-0">
@@ -82,16 +82,24 @@ function PricePageContent() {
             </div>
 
             {error && (
-              <div className="text-center py-8">
-                <p className="text-red-600 mb-4">
-                  価格データの読み込みに失敗しました。再試行してください。
-                </p>
-                <button
-                  onClick={() => window.location.reload()}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                >
-                  再試行
-                </button>
+              <div className="glass rounded-2xl p-8 mb-8 border border-red-500/30 animate-slide-up">
+                <div className="text-center">
+                  <div className="w-12 h-12 mx-auto mb-4 bg-red-500/20 rounded-full flex items-center justify-center">
+                    <svg className="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <p className="text-red-300 mb-6 font-medium">
+                    価格データの読み込みに失敗しました。再試行してください。
+                  </p>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="group relative px-6 py-3 bg-gradient-to-r from-red-500 to-pink-600 text-white font-medium rounded-xl hover:from-red-600 hover:to-pink-700 transition-all duration-200 transform hover:scale-105 focus-ring"
+                  >
+                    <span className="relative z-10">再試行</span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-pink-700 rounded-xl blur opacity-0 group-hover:opacity-30 transition-opacity duration-200" />
+                  </button>
+                </div>
               </div>
             )}
 

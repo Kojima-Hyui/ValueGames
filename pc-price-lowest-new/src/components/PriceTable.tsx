@@ -169,44 +169,44 @@ export function PriceTable({
                           href={store.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 transition-colors"
+                          className="group inline-flex items-center gap-2 text-xs text-indigo-400 hover:text-indigo-300 transition-colors duration-200"
                         >
                           ストアを見る
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-3 h-3 group-hover:translate-x-0.5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                           </svg>
                         </a>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-8 py-6">
                       {store.subscriptionInfo ? (
                         <div className="flex items-center gap-2">
-                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800 font-medium">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-medium">
                             {store.subscriptionInfo.type === "subscription" ? "📺 サブスク" : "🎁 無料"}
                           </span>
                         </div>
                       ) : store.isOnSale ? (
-                        <div className="flex items-center gap-2">
-                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-red-100 text-red-800 font-medium">
+                        <div className="flex items-center gap-3">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-orange-500/20 text-orange-300 border border-orange-500/30 font-medium">
                             🔥 セール中
                           </span>
-                          <span className="text-sm text-gray-600">
+                          <span className="text-sm text-orange-400 font-semibold">
                             {store.discountPercent}% OFF
                           </span>
                         </div>
                       ) : (
                         <div className="flex items-center gap-2">
-                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-100 text-gray-600">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-700/60 text-gray-400 border border-gray-600/30">
                             通常価格
                           </span>
                         </div>
                       )}
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-8 py-6">
                       {allTimeLowStore ? (
                         <div className="space-y-2">
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium text-gray-900">{formatJPY(allTimeLowStore.priceJPY)}</span>
+                          <div className="flex items-center gap-3">
+                            <span className="font-semibold text-gray-200 group-hover:text-white transition-colors duration-200">{formatJPY(allTimeLowStore.priceJPY)}</span>
                             <DiscountBadge discount={allTimeDiscount} />
                           </div>
                           <div className="text-xs text-gray-500">
@@ -215,8 +215,8 @@ export function PriceTable({
                         </div>
                       ) : (
                         <div className="flex items-center gap-2">
-                          <span className="text-gray-400 text-sm">データなし</span>
-                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-600">
+                          <span className="text-gray-500 text-sm">データなし</span>
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-700/60 text-gray-500 border border-gray-600/30">
                             データなし
                           </span>
                         </div>
@@ -231,11 +231,11 @@ export function PriceTable({
       </div>
 
       {currentPrices.length === 0 && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12">
+        <div className="glass rounded-2xl p-16 animate-slide-up">
           <div className="text-center">
-            <div className="text-4xl mb-4">🎮</div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">価格データがありません</h3>
-            <p className="text-gray-500">このゲームは選択したストアまたは地域で利用できない可能性があります。</p>
+            <div className="text-6xl mb-6 opacity-60">🎮</div>
+            <h3 className="text-xl font-semibold text-gray-200 mb-3">価格データがありません</h3>
+            <p className="text-gray-400">このゲームは選択したストアまたは地域で利用できない可能性があります。</p>
           </div>
         </div>
       )}
