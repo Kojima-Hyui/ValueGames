@@ -77,7 +77,6 @@ function PricePageContent() {
                     title: titleFromUrl || gameData?.title || itadId
                   }}
                   size="lg"
-                  showText
                   className="whitespace-nowrap"
                 />
               </div>
