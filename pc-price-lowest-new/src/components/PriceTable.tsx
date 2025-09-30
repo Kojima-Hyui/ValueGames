@@ -65,24 +65,27 @@ export function PriceTable({
         </div>
       )}
 
-      {bundleInfo && bundleInfo.length > 0 && (
+{(() => {
+        // 現在アクティブなバンドル（価格が設定されており、URLもある）のみをフィルタリング
+        const activeBundles = bundleInfo?.filter(bundle => 
+          bundle.priceJPY && bundle.priceJPY > 0 && bundle.url
+        ) || [];
+        
+        return activeBundles.length > 0 && (
         <div className="bg-gradient-to-r from-purple-50 to-purple-100 border border-purple-200 rounded-xl p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
             <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-            <h3 className="font-semibold text-purple-800">バンドル情報</h3>
+            <h3 className="font-semibold text-purple-800">現在利用可能なバンドル</h3>
           </div>
           <div className="space-y-3">
-            {bundleInfo.map((bundle, index) => (
+            {activeBundles.map((bundle, index) => (
               <div key={index} className="flex items-center justify-between bg-white/60 rounded-lg p-3">
                 <div className="flex-1">
                   <div className="font-medium text-purple-900">{bundle.name}</div>
-                  {bundle.priceJPY && bundle.priceJPY > 0 && (
-                    <div className="text-sm text-purple-700">
-                      バンドル価格: {formatJPY(bundle.priceJPY)}
-                    </div>
-                  )}
+                  <div className="text-sm text-purple-700">
+                    バンドル価格: {formatJPY(bundle.priceJPY!)}
+                  </div>
                 </div>
-                {bundle.url && (
                   <a
                     href={bundle.url}
                     target="_blank"
@@ -94,12 +97,12 @@ export function PriceTable({
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                     </svg>
                   </a>
-                )}
               </div>
             ))}
           </div>
         </div>
-      )}
+        );
+      })()}
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">

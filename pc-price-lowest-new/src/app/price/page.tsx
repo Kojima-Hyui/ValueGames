@@ -72,16 +72,6 @@ function PricePageContent() {
     <div className="min-h-screen bg-background text-foreground">
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
-          {/* API状況通知 */}
-          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-blue-400 rounded-full"></div>
-              <p className="text-blue-800 text-sm">
-                <strong>リアルタイム価格:</strong> IsThereAnyDeal APIから最新の価格情報を取得しています。
-              </p>
-            </div>
-          </div>
-          
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-4">
               <button
