@@ -4,6 +4,8 @@ import { Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { PriceTable } from "@/components/PriceTable";
+import { FavoriteButton } from "@/components/FavoriteButton";
+import { useFavorites } from "@/hooks/useFavorites";
 import { QuoteResponse } from "@/lib/types";
 
 async function fetchQuote(itadId: string): Promise<QuoteResponse> {
@@ -31,6 +33,7 @@ function PricePageContent() {
   const searchParams = useSearchParams();
   const itadId = searchParams.get("id");
   const titleFromUrl = searchParams.get("title");
+  const { count } = useFavorites();
 
   const {
     data: quoteData,
@@ -86,10 +89,31 @@ function PricePageContent() {
               >
                 新しく検索
               </button>
-              <h1 className="text-2xl font-bold">
-                価格比較: {titleFromUrl || gameData?.title || itadId}
-              </h1>
+              <div className="flex items-center gap-4">
+                <h1 className="text-2xl font-bold">
+                  価格比較: {titleFromUrl || gameData?.title || itadId}
+                </h1>
+                <FavoriteButton 
+                  game={{
+                    id: itadId,
+                    title: titleFromUrl || gameData?.title || itadId
+                  }}
+                  size="lg"
+                  showText
+                />
+              </div>
             </div>
+            <button
+              onClick={() => router.push('/favorites')}
+              className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:text-blue-800 transition-colors"
+            >
+              <div className="w-5 h-5 text-red-500">
+                <svg className="w-full h-full fill-current" viewBox="0 0 24 24">
+                  <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+              </div>
+              <span className="text-sm font-medium">お気に入り ({count})</span>
+            </button>
           </div>
 
           {error && (
