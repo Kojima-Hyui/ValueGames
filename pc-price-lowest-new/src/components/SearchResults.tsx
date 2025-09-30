@@ -70,23 +70,27 @@ export function SearchResults({ games, isLoading, query }: SearchResultsProps) {
               className="p-4 hover:bg-blue-50 cursor-pointer transition-colors"
             >
               <div className="flex items-center gap-4">
-                {game.assets?.banner145 ? (
-                  <Image
-                    src={game.assets.banner145}
-                    alt={game.title}
-                    width={64}
-                    height={64}
-                    className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.style.display = 'none';
-                    }}
-                  />
-                ) : (
-                  <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center flex-shrink-0 relative">
+                  {game.assets?.banner145 ? (
+                    <Image
+                      src={game.assets.banner145}
+                      alt={game.title}
+                      width={64}
+                      height={64}
+                      className="w-16 h-16 object-cover rounded-lg"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent) {
+                          parent.innerHTML = '<span class="text-lg font-semibold text-blue-600">🎮</span>';
+                        }
+                      }}
+                    />
+                  ) : (
                     <span className="text-lg font-semibold text-blue-600">🎮</span>
-                  </div>
-                )}
+                  )}
+                </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-medium text-gray-900 truncate">{game.title}</h3>
                   <p className="text-sm text-gray-500">

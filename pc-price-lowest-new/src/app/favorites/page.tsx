@@ -73,27 +73,30 @@ function FavoritesPageContent() {
                 {favorites.map((game) => (
                   <div key={game.id} className="p-4 hover:bg-blue-50 transition-colors">
                     <div className="flex items-center gap-4">
-                      {game.assets?.banner145 ? (
-                        <Image
-                          src={game.assets.banner145}
-                          alt={game.title}
-                          width={64}
-                          height={64}
-                          className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.style.display = 'none';
-                          }}
-                        />
-                      ) : (
-                        // ゲーム画像がない場合のフォールバック表示を改善
-                        <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center flex-shrink-0 border border-gray-300">
+                      <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center flex-shrink-0 border border-gray-300 relative">
+                        {game.assets?.banner145 ? (
+                          <Image
+                            src={game.assets.banner145}
+                            alt={game.title}
+                            width={64}
+                            height={64}
+                            className="w-16 h-16 object-cover rounded-lg"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                              const parent = target.parentElement;
+                              if (parent) {
+                                parent.innerHTML = '<div class="text-center"><div class="text-2xl mb-1">🎮</div><div class="text-xs text-gray-500 font-medium">No Image</div></div>';
+                              }
+                            }}
+                          />
+                        ) : (
                           <div className="text-center">
                             <div className="text-2xl mb-1">🎮</div>
                             <div className="text-xs text-gray-500 font-medium">No Image</div>
                           </div>
-                        </div>
-                      )}
+                        )}
+                      </div>
                       
                       <div className="flex-1 min-w-0">
                         <h3 className="font-medium text-gray-900 truncate">{game.title}</h3>

@@ -66,22 +66,20 @@ function PricePageContent() {
       <div className="pt-16"> {/* ヘッダーの高さ分の余白 */}
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-8">
-              <div className="flex items-center justify-center gap-4 flex-wrap">
-                <h1 className="text-2xl font-bold">
-                  価格比較: {titleFromUrl || gameData?.title || itadId}
-                </h1>
-                <div className="flex-shrink-0">
-                  <FavoriteButton 
-                    game={{
-                      id: itadId,
-                      title: titleFromUrl || gameData?.title || itadId
-                    }}
-                    size="lg"
-                    showText
-                    className="whitespace-nowrap"
-                  />
-                </div>
+            <div className="text-center mb-8 relative">
+              <h1 className="text-2xl font-bold">
+                価格比較: {titleFromUrl || gameData?.title || itadId}
+              </h1>
+              <div className="absolute top-0 right-0">
+                <FavoriteButton 
+                  game={{
+                    id: itadId,
+                    title: titleFromUrl || gameData?.title || itadId
+                  }}
+                  size="lg"
+                  showText
+                  className="whitespace-nowrap"
+                />
               </div>
             </div>
 
