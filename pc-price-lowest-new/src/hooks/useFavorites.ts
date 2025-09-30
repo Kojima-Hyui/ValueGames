@@ -16,6 +16,9 @@ export interface FavoriteGame {
 
 const FAVORITES_KEY = "pc-price-lowest-favorites";
 
+// ローカルストレージアクセスをシリアル化するためのキュー
+let updateQueue: Promise<void> = Promise.resolve();
+
 export function useFavorites() {
   const [favorites, setFavorites] = useState<FavoriteGame[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -36,15 +39,37 @@ export function useFavorites() {
     }
   }, []);
 
-  // ローカルストレージに保存（関数型更新対応）
+  // ローカルストレージに保存（キューイング対応）
   const saveFavorites = (updater: FavoriteGame[] | ((prev: FavoriteGame[]) => FavoriteGame[])) => {
     setFavorites(prevFavorites => {
       const newFavorites = typeof updater === 'function' ? updater(prevFavorites) : updater;
-      try {
-        localStorage.setItem(FAVORITES_KEY, JSON.stringify(newFavorites));
-      } catch (error) {
-        console.error("Failed to save favorites:", error);
-      }
+      console.log(`💾 Saving to localStorage: ${newFavorites.length} items`);
+      console.log(`💾 Items:`, newFavorites.map(f => f.title));
+      
+      // ローカルストレージアクセスをキューイング
+      updateQueue = updateQueue.then(async () => {
+        try {
+          // 最新のローカルストレージ内容を確認
+          const currentStored = localStorage.getItem(FAVORITES_KEY);
+          const currentParsed = currentStored ? JSON.parse(currentStored) : [];
+          console.log(`📖 Current localStorage before update: ${currentParsed.length} items`);
+          
+          localStorage.setItem(FAVORITES_KEY, JSON.stringify(newFavorites));
+          console.log(`✅ Successfully saved to localStorage: ${newFavorites.length} items`);
+          
+          // 小さな遅延を追加して確実に書き込み完了を待つ
+          await new Promise(resolve => setTimeout(resolve, 10));
+          
+          // 確認のため即座に読み込み
+          const verification = localStorage.getItem(FAVORITES_KEY);
+          const parsed = verification ? JSON.parse(verification) : [];
+          console.log(`🔍 Verification - localStorage contains: ${parsed.length} items`);
+          console.log(`🔍 Verification items:`, parsed.map((f: FavoriteGame) => f.title));
+        } catch (error) {
+          console.error("❌ Failed to save favorites:", error);
+        }
+      });
+      
       return newFavorites;
     });
   };
@@ -77,19 +102,29 @@ export function useFavorites() {
 
   // お気に入りをトグル（最新の状態を参照）
   const toggleFavorite = (game: Omit<FavoriteGame, "addedAt">) => {
+    console.log(`🔄 toggleFavorite called for: ${game.title} (${game.id})`);
+    
     saveFavorites(prevFavorites => {
+      console.log(`📊 Current favorites count: ${prevFavorites.length}`);
+      console.log(`📋 Current favorites:`, prevFavorites.map(f => f.title));
+      
       const isCurrentlyFavorite = prevFavorites.some(fav => fav.id === game.id);
+      console.log(`❓ Is ${game.title} currently favorite? ${isCurrentlyFavorite}`);
       
       if (isCurrentlyFavorite) {
         // 削除
-        return prevFavorites.filter(fav => fav.id !== game.id);
+        const newFavorites = prevFavorites.filter(fav => fav.id !== game.id);
+        console.log(`➖ Removing ${game.title}. New count: ${newFavorites.length}`);
+        return newFavorites;
       } else {
         // 追加
         const newFavorite: FavoriteGame = {
           ...game,
           addedAt: new Date().toISOString(),
         };
-        return [...prevFavorites, newFavorite];
+        const newFavorites = [...prevFavorites, newFavorite];
+        console.log(`➕ Adding ${game.title}. New count: ${newFavorites.length}`);
+        return newFavorites;
       }
     });
   };

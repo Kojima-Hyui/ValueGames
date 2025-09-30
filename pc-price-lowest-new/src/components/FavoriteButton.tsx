@@ -31,21 +31,25 @@ export function FavoriteButton({
     lg: "w-10 h-10 text-lg"
   };
 
-  const handleClick = async (e: React.MouseEvent) => {
+  const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // 親要素のクリックイベントを防ぐ
     
     // 連続クリック防止
     if (isProcessing) {
+      console.log(`🚫 Button click ignored - already processing: ${game.title}`);
       return;
     }
     
+    console.log(`🖱️ Button clicked: ${game.title} (${game.id})`);
     setIsProcessing(true);
+    
     try {
       toggleFavorite(game);
-      // 短時間の遅延で連続クリックを防ぐ
-      await new Promise(resolve => setTimeout(resolve, 100));
     } finally {
-      setIsProcessing(false);
+      // 短時間の遅延で連続クリックを防ぐ
+      setTimeout(() => {
+        setIsProcessing(false);
+      }, 150);
     }
   };
 
