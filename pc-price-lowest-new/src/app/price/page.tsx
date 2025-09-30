@@ -2,7 +2,7 @@
 
 import { Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { PriceTable } from "@/components/PriceTable";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { Header } from "@/components/Header";
@@ -29,7 +29,6 @@ async function fetchQuote(itadId: string): Promise<QuoteResponse> {
 }
 
 function PricePageContent() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const itadId = searchParams.get("id");
   const titleFromUrl = searchParams.get("title");

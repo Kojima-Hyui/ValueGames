@@ -1,7 +1,7 @@
 // src/lib/itad-client.ts
 // Client-side ITAD API functions for static deployment
 
-import { ITADDeal, ITADGame, ITADStoreLow, ITADOverview, ITADBundle } from './types';
+import { ITADDeal } from './types';
 
 // CORS制限回避のため複数のプロキシを試行
 const CORS_PROXIES = [

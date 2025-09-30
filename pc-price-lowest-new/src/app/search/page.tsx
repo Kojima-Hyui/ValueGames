@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { SearchResults } from "@/components/SearchResults";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -23,7 +23,6 @@ async function searchGames(query: string) {
 
 function SearchPageContent() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const initialQuery = searchParams.get("query") || "";
   
   const [query, setQuery] = useState(initialQuery);
