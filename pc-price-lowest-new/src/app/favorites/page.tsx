@@ -52,21 +52,20 @@ function GameImage({ game }: { game: FavoriteGame }) {
   const currentImageUrl = refreshedImageUrl || game.assets?.banner145;
 
   return (
-    <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center flex-shrink-0 border border-gray-300 relative">
+    <div className="w-20 h-20 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-xl flex items-center justify-center flex-shrink-0 border border-indigo-500/20 group-hover:border-indigo-400/40 transition-colors duration-200 relative">
       {currentImageUrl && !imageError ? (
         <Image
           src={currentImageUrl}
           alt={game.title}
-          width={64}
-          height={64}
-          className="w-16 h-16 object-cover rounded-lg"
+          width={80}
+          height={80}
+          className="w-20 h-20 object-cover rounded-xl"
           onError={handleImageError}
           onLoad={() => console.log('Image loaded successfully for game:', game.title)}
         />
       ) : (
         <div className="text-center">
-          <div className="text-2xl mb-1">🎮</div>
-          <div className="text-xs text-gray-500 font-medium">No Image</div>
+          <div className="text-2xl text-indigo-400">🎮</div>
         </div>
       )}
     </div>
@@ -118,74 +117,85 @@ function FavoritesPageContent() {
       <div className="pt-24"> {/* ヘッダーの高さ分の余白 */}
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-8">
-              <div className="flex items-center justify-center gap-3 mb-2">
-                <div className="w-6 h-6 text-red-500">
-                  <svg className="w-full h-full fill-current" viewBox="0 0 24 24">
+            <div className="text-center mb-12 animate-fade-in">
+              <div className="flex items-center justify-center gap-4 mb-4">
+                <div className="w-8 h-8 text-rose-400">
+                  <svg className="w-full h-full fill-current animate-pulse" viewBox="0 0 24 24">
                     <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                   </svg>
                 </div>
-                <h1 className="text-2xl font-bold">お気に入りゲーム ({favorites.length})</h1>
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-rose-400 via-pink-400 to-red-400 bg-clip-text text-transparent">
+                  お気に入りゲーム
+                </h1>
+              </div>
+              <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-rose-500/20 to-pink-500/20 border border-rose-500/30 rounded-full">
+                <span className="text-rose-300 font-medium">{favorites.length} 件</span>
               </div>
             </div>
 
             {favorites.length === 0 ? (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12">
+              <div className="glass rounded-2xl p-16 animate-slide-up">
                 <div className="text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 text-gray-300">
+                  <div className="w-20 h-20 mx-auto mb-6 text-gray-500">
                     <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                     </svg>
                   </div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">お気に入りがありません</h3>
-                  <p className="text-gray-500 mb-6">ゲームを検索して、❤️ボタンでお気に入りに追加しましょう。</p>
+                  <h3 className="text-xl font-semibold text-gray-200 mb-3">お気に入りがありません</h3>
+                  <p className="text-gray-400 mb-8 max-w-md mx-auto">ゲームを検索して、<span className="text-rose-400">❤️</span>ボタンでお気に入りに追加しましょう。</p>
                   <button
                     onClick={handleNewSearch}
-                    className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                    className="group relative px-8 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-medium rounded-xl hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 focus-ring"
                   >
-                    ゲームを検索する
+                    <span className="relative z-10">ゲームを検索する</span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-700 rounded-xl blur opacity-0 group-hover:opacity-50 transition-opacity duration-200" />
                   </button>
                 </div>
               </div>
             ) : (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-              <div className="divide-y divide-gray-100">
-                {favorites.map((game) => (
-                  <div key={game.id} className="p-4 hover:bg-blue-50 transition-colors">
-                    <div className="flex items-center gap-4">
-                      <GameImage game={game} />
-                      
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-gray-900 truncate">{game.title}</h3>
-                        <p className="text-sm text-gray-500">
-                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-600 mr-2">
-                            お気に入り追加日: {format(new Date(game.addedAt), "yyyy/MM/dd")}
-                          </span>
-                          ID: {game.id}
-                        </p>
-                      </div>
-                      
-                      <div className="flex items-center gap-3 flex-shrink-0">
-                        <FavoriteButton 
-                          game={{
-                            id: game.id,
-                            title: game.title,
-                            assets: game.assets
-                          }}
-                          size="sm"
-                        />
-                        <button
-                          onClick={() => handleGameClick(game.id, game.title)}
-                          className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-                        >
-                          価格を見る
-                        </button>
+            <div className="grid gap-4 animate-slide-up">
+              {favorites.map((game, index) => (
+                <div 
+                  key={game.id} 
+                  className="group glass rounded-2xl p-6 hover:bg-gray-800/40 hover:border-gray-600/50 transition-all duration-200 animate-fade-in"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  <div className="flex items-center gap-6">
+                    <GameImage game={game} />
+                    
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-lg font-semibold text-gray-200 truncate group-hover:text-white transition-colors duration-200">
+                        {game.title}
+                      </h3>
+                      <div className="flex items-center gap-3 mt-2">
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                          追加日: {format(new Date(game.addedAt), "yyyy/MM/dd")}
+                        </span>
+                        <span className="text-xs text-gray-500 font-mono">ID: {game.id}</span>
                       </div>
                     </div>
+                    
+                    <div className="flex items-center gap-4 flex-shrink-0">
+                      <FavoriteButton 
+                        game={{
+                          id: game.id,
+                          title: game.title,
+                          assets: game.assets
+                        }}
+                        size="md"
+                      />
+                      <button
+                        onClick={() => handleGameClick(game.id, game.title)}
+                        className="group relative px-6 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-sm font-medium rounded-xl hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 focus-ring"
+                      >
+                        <span className="relative z-10">価格を見る</span>
+                        <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-700 rounded-xl blur opacity-0 group-hover:opacity-30 transition-opacity duration-200" />
+                      </button>
+                    </div>
                   </div>
-                  ))}
                 </div>
-              </div>
+              ))}
+            </div>
             )}
           </div>
         </div>

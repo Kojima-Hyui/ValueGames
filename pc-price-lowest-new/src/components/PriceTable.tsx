@@ -49,19 +49,22 @@ export function PriceTable({
   const storeLowAllMap = new Map(storeLowAll.map(item => [item.id, item]));
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 animate-fade-in">
       {allTimeLow && (
-        <div className="bg-gradient-to-r from-green-50 to-green-100 border border-green-200 rounded-xl p-6 shadow-sm">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-            <h3 className="font-semibold text-green-800">史上最安値</h3>
+        <div className="glass rounded-2xl p-8 border border-emerald-500/30 bg-gradient-to-r from-emerald-500/10 to-green-500/10 animate-slide-up">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-3 h-3 bg-emerald-400 rounded-full animate-pulse"></div>
+            <h3 className="text-xl font-bold text-emerald-300">史上最安値</h3>
           </div>
-          <p className="text-green-700 text-lg">
-            <span className="font-bold text-2xl">{formatJPY(allTimeLow.priceJPY)}</span>
-            <span className="ml-3 text-sm">
-              {allTimeLow.shopName}で{formatDate(allTimeLow.timestamp)}に記録
+          <div className="flex items-baseline gap-4">
+            <span className="text-4xl font-bold bg-gradient-to-r from-emerald-300 to-green-300 bg-clip-text text-transparent">
+              {formatJPY(allTimeLow.priceJPY)}
             </span>
-          </p>
+            <div className="text-gray-300">
+              <span className="font-medium text-emerald-400">{allTimeLow.shopName}</span>
+              <span className="text-gray-400 ml-2">で{formatDate(allTimeLow.timestamp)}に記録</span>
+            </div>
+          </div>
         </div>
       )}
 
@@ -72,31 +75,34 @@ export function PriceTable({
         ) || [];
         
         return activeBundles.length > 0 && (
-        <div className="bg-gradient-to-r from-purple-50 to-purple-100 border border-purple-200 rounded-xl p-6 shadow-sm">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-            <h3 className="font-semibold text-purple-800">現在利用可能なバンドル</h3>
+        <div className="glass rounded-2xl p-6 border border-purple-500/30 bg-gradient-to-r from-purple-500/10 to-violet-500/10 animate-slide-up" style={{ animationDelay: '0.2s' }}>
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-3 h-3 bg-purple-400 rounded-full animate-pulse"></div>
+            <h3 className="text-xl font-bold text-purple-300">現在利用可能なバンドル</h3>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-4">
             {activeBundles.map((bundle, index) => (
-              <div key={index} className="flex items-center justify-between bg-white/60 rounded-lg p-3">
-                <div className="flex-1">
-                  <div className="font-medium text-purple-900">{bundle.name}</div>
-                  <div className="text-sm text-purple-700">
-                    バンドル価格: {formatJPY(bundle.priceJPY!)}
+              <div key={index} className="group glass rounded-xl p-4 border border-purple-500/20 hover:border-purple-400/40 transition-all duration-200">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="font-semibold text-purple-200 group-hover:text-white transition-colors duration-200">{bundle.name}</div>
+                    <div className="text-purple-300 mt-1">
+                      バンドル価格: <span className="font-bold text-purple-200">{formatJPY(bundle.priceJPY!)}</span>
+                    </div>
                   </div>
-                </div>
                   <a
                     href={bundle.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 px-3 py-1 text-sm text-purple-600 hover:text-purple-800 bg-white rounded-md hover:bg-purple-50 transition-colors"
+                    className="group relative inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-violet-600 text-white text-sm font-medium rounded-lg hover:from-purple-600 hover:to-violet-700 transition-all duration-200 transform hover:scale-105 focus-ring"
                   >
-                    バンドルを見る
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <span className="relative z-10">バンドルを見る</span>
+                    <svg className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                     </svg>
+                    <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-violet-700 rounded-lg blur opacity-0 group-hover:opacity-30 transition-opacity duration-200" />
                   </a>
+                </div>
               </div>
             ))}
           </div>
@@ -104,51 +110,51 @@ export function PriceTable({
         );
       })()}
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div className="glass rounded-2xl overflow-hidden animate-slide-up" style={{ animationDelay: '0.4s' }}>
         <div className="overflow-x-auto">
           <table className="min-w-full">
-            <thead className="bg-gray-50 sticky top-0 z-10">
+            <thead className="bg-gray-800/60 sticky top-0 z-10">
               <tr>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700 border-b border-gray-200">ストア</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700 border-b border-gray-200">現在価格</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700 border-b border-gray-200">セール状況</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700 border-b border-gray-200">史上最安</th>
+                <th className="px-8 py-5 text-left text-sm font-bold text-gray-200 border-b border-gray-600/50">ストア</th>
+                <th className="px-8 py-5 text-left text-sm font-bold text-gray-200 border-b border-gray-600/50">現在価格</th>
+                <th className="px-8 py-5 text-left text-sm font-bold text-gray-200 border-b border-gray-600/50">セール状況</th>
+                <th className="px-8 py-5 text-left text-sm font-bold text-gray-200 border-b border-gray-600/50">史上最安</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-100">
+            <tbody className="divide-y divide-gray-700/30">
               {currentPrices.map((store) => {
                 const allTimeLowStore = storeLowAllMap.get(store.id);
                 const allTimeDiscount = allTimeLowStore ? calculateDiscount(allTimeLowStore.priceJPY, store.priceJPY) : 0;
 
                 return (
-                  <tr key={store.id} className="hover:bg-blue-50/50 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center">
-                          <span className="text-sm font-semibold text-blue-600">
+                  <tr key={store.id} className="group hover:bg-gray-800/30 transition-colors duration-200">
+                    <td className="px-8 py-6">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-gradient-to-br from-indigo-500/20 to-blue-500/20 rounded-xl flex items-center justify-center border border-indigo-500/20 group-hover:border-indigo-400/40 transition-colors duration-200">
+                          <span className="text-sm font-bold text-indigo-400">
                             {store.name.substring(0, 2).toUpperCase()}
                           </span>
                         </div>
                         <div>
-                          <div className="font-medium text-gray-900">{store.name}</div>
-                          <div className="text-xs text-gray-500">ID: {store.id}</div>
+                          <div className="font-semibold text-gray-200 group-hover:text-white transition-colors duration-200">{store.name}</div>
+                          <div className="text-xs text-gray-500 font-mono">ID: {store.id}</div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-8 py-6">
                       <div className="space-y-2">
                         {store.subscriptionInfo ? (
                           <div className="flex items-center gap-2">
-                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800 font-medium">
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-medium">
                               {store.subscriptionInfo.type === "subscription" ? "📺" : "🎁"} {store.subscriptionInfo.service}
                             </span>
-                            <span className="text-sm text-green-700">
+                            <span className="text-sm text-emerald-400">
                               {store.subscriptionInfo.type === "subscription" ? "サブスク対象" : "無料配布"}
                             </span>
                           </div>
                         ) : (
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold text-lg text-gray-900">{formatJPY(store.priceJPY)}</span>
+                          <div className="flex items-center gap-3">
+                            <span className="font-bold text-xl text-gray-200 group-hover:text-white transition-colors duration-200">{formatJPY(store.priceJPY)}</span>
                             {store.isOnSale && store.discountPercent && (
                               <DiscountBadge discount={store.discountPercent} />
                             )}
