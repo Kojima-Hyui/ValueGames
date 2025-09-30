@@ -23,7 +23,7 @@ function FavoritesPageContent() {
   if (!isLoaded) {
     return (
       <div className="min-h-screen bg-background text-foreground">
-        <Header showBackButton showSearchButton />
+        <Header showBackButton showSearchButton centerLogo />
         <div className="pt-16 flex items-center justify-center min-h-[calc(100vh-4rem)]">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
@@ -33,7 +33,7 @@ function FavoritesPageContent() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <Header showBackButton showSearchButton />
+      <Header showBackButton showSearchButton centerLogo />
       
       <div className="pt-16"> {/* ヘッダーの高さ分の余白 */}
         <div className="container mx-auto px-4 py-8">
@@ -86,8 +86,12 @@ function FavoritesPageContent() {
                           }}
                         />
                       ) : (
-                        <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center flex-shrink-0">
-                          <span className="text-lg font-semibold text-blue-600">🎮</span>
+                        // ゲーム画像がない場合のフォールバック表示を改善
+                        <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center flex-shrink-0 border border-gray-300">
+                          <div className="text-center">
+                            <div className="text-2xl mb-1">🎮</div>
+                            <div className="text-xs text-gray-500 font-medium">No Image</div>
+                          </div>
                         </div>
                       )}
                       
